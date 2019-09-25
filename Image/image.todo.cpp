@@ -573,14 +573,83 @@ Image32 Image32::scaleGaussian( float scaleFactor ) const
 
 Image32 Image32::rotateNearest( float angle ) const
 {
-	Util::Throw( "Image32::rotateNearest undefined" );
-	return Image32();
+	//Util::Throw( "Image32::rotateNearest undefined" );
+	Image32 output = Image32(*this);
+	float old_TL_X = .5 * this->width() + (0 - .5 * this->width()) * cos(-angle * PI / 180.0) - (0 - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_TR_X = .5 * this->width() + ( this->width() - .5 * this->width()) * cos(-angle * PI / 180.0) - (0 - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_BR_X = .5 * this->width() + (this->width() - .5 * this->width()) * cos(-angle * PI / 180.0) - (this->height() - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_BL_X = .5 * this->width() + (0 - .5 * this->width()) * cos(-angle * PI / 180.0) - (this->height() - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float max_x = std::max(old_TL_X, std::max(old_TR_X, std::max(old_BR_X, old_BL_X)));
+	float min_x = std::min(old_TL_X, std::min(old_TR_X, std::min(old_BR_X, old_BL_X)));
+	float old_TL_Y = (0 - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (0 - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_TR_Y = (this->width() - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (0 - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_BR_Y = (this->width()- .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (this->height() - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_BL_Y = (0 - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (this->height() - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float max_y = std::max(old_TL_Y, std::max(old_TR_Y, std::max(old_BR_Y, old_BL_Y)));
+	float min_y = std::min(old_TL_Y, std::min(old_TR_Y, std::min(old_BR_Y, old_BL_Y)));
+	float new_x = max_x - min_x;
+	float new_y = max_y - min_y;
+	if (min_x < 0) {
+		min_x = -min_x;
+	}
+	if (min_y < 0) {
+		min_y = -min_y;
+	}
+	//std::cout << min_x << " " << max_x << std::endl;
+	output.setSize(new_x + 1, new_y + 1);
+	for (int x =-min_x; x < output.width() - min_x; x++)
+	{
+		for (int y = -min_y; y < output.height() - min_y; y++)
+		{
+			Pixel32& temp_out = output.operator() (min_x + x, min_y + y);
+			float old_x = .5 * this->width() + (x-.5*this->width()) * cos(-angle * PI /180.0)  - (y - .5 * this->height()) * sin(-angle * PI / 180.0);
+			float old_y = (x - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (y - .5 * this->height()) * cos(-angle * PI / 180.0 );
+
+			Pixel32 temp = this->nearestSample(old_x, old_y);
+			temp_out = temp;
+		}
+	}
+	return output;
 }
 
 Image32 Image32::rotateBilinear( float angle ) const
 {
-	Util::Throw( "Image32::rotateBilinear undefined" );
-	return Image32();
+	//Util::Throw( "Image32::rotateBilinear undefined" );
+	Image32 output = Image32(*this);
+	float old_TL_X = .5 * this->width() + (0 - .5 * this->width()) * cos(-angle * PI / 180.0) - (0 - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_TR_X = .5 * this->width() + (this->width() - .5 * this->width()) * cos(-angle * PI / 180.0) - (0 - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_BR_X = .5 * this->width() + (this->width() - .5 * this->width()) * cos(-angle * PI / 180.0) - (this->height() - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float old_BL_X = .5 * this->width() + (0 - .5 * this->width()) * cos(-angle * PI / 180.0) - (this->height() - .5 * this->height()) * sin(-angle * PI / 180.0);
+	float max_x = std::max(old_TL_X, std::max(old_TR_X, std::max(old_BR_X, old_BL_X)));
+	float min_x = std::min(old_TL_X, std::min(old_TR_X, std::min(old_BR_X, old_BL_X)));
+	float old_TL_Y = (0 - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (0 - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_TR_Y = (this->width() - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (0 - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_BR_Y = (this->width() - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (this->height() - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float old_BL_Y = (0 - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (this->height() - .5 * this->height()) * cos(-angle * PI / 180.0);
+	float max_y = std::max(old_TL_Y, std::max(old_TR_Y, std::max(old_BR_Y, old_BL_Y)));
+	float min_y = std::min(old_TL_Y, std::min(old_TR_Y, std::min(old_BR_Y, old_BL_Y)));
+	float new_x = max_x - min_x;
+	float new_y = max_y - min_y;
+	if (min_x < 0) {
+		min_x = -min_x;
+	}
+	if (min_y < 0) {
+		min_y = -min_y;
+	}
+	output.setSize(new_x + 1, new_y + 1);
+	for (int x = -min_x; x < output.width() - min_x; x++)
+	{
+		for (int y = -min_y; y < output.height() - min_y; y++)
+		{
+			Pixel32& temp_out = output.operator() (min_x + x, min_y + y);
+			float old_x = .5 * this->width() + (x - .5 * this->width()) * cos(-angle * PI / 180.0) - (y - .5 * this->height()) * sin(-angle * PI / 180.0);
+			float old_y = (x - .5 * this->width()) * sin(-angle * PI / 180.0) + .5 * this->height() + (y - .5 * this->height()) * cos(-angle * PI / 180.0);
+
+			Pixel32 temp = this->bilinearSample(old_x, old_y);
+			temp_out = temp;
+		}
+	}
+	return output;
 }
 	
 Image32 Image32::rotateGaussian( float angle ) const
@@ -591,14 +660,49 @@ Image32 Image32::rotateGaussian( float angle ) const
 
 void Image32::setAlpha( const Image32& matte )
 {
-	Util::Throw( "Image32::setAlpha undefined" );
+	//Util::Throw( "Image32::setAlpha undefined" );
+	for (int x = 0; x < this->width(); x++)
+	{
+		for (int y = 0; y < this->height(); y++)
+		{
+			Pixel32 &temp_in = this->operator() (x, y);
+			Pixel32 temp_matte;
+			if (x < matte.width() - 1 && y < matte.height() - 1)
+			{
+				temp_matte = matte.operator() (x, y);
+			}
+			else
+			{
+				temp_matte = Pixel32();
+				temp_matte.b = 255;
+			}
+			temp_in.a = temp_matte.b;
+		}
+	}
 	return;
 }
 
 Image32 Image32::composite( const Image32& overlay ) const
 {
-	Util::Throw( "Image32::composite undefined" );
-	return Image32();
+	if (this->height() != overlay.height() || this->width() != overlay.width()) {
+		Util::Throw("Image32::composite undefined for images of different dimensions");
+	}
+	Image32 output = Image32(*this);
+	for (int x = 0; x < this->width(); x++)
+	{
+		for (int y = 0; y < this->height(); y++)
+		{
+			Pixel32 temp_in = this->operator() (x, y);
+			Pixel32 temp_overlay = overlay.operator() (x, y);
+			Pixel32& temp_out = output.operator() (x, y);
+			//std::cout << (temp_overlay.a)/255.0 << std::endl;
+			temp_out.r = (unsigned char)std::max(0, std::min(255, (int)(temp_overlay.r * (temp_overlay.a/255.0) + temp_in.r * (1.0 - (temp_overlay.a/255.0)))));
+			temp_out.g = (unsigned char)std::max(0, std::min(255, (int)(temp_overlay.g * (temp_overlay.a/255.0) + temp_in.g * (1.0 - (temp_overlay.a/255.0)))));
+			temp_out.b = (unsigned char)std::max(0, std::min(255, (int)(temp_overlay.b * (temp_overlay.a/255.0) + temp_in.b * (1.0 - (temp_overlay.a/255.0)))));
+		}
+	}
+	return output;
+	
 }
 
 Image32 Image32::CrossDissolve( const Image32& source , const Image32& destination , float blendWeight )
@@ -614,8 +718,18 @@ Image32 Image32::warp( const OrientedLineSegmentPairs& olsp ) const
 
 Image32 Image32::funFilter( void ) const
 {
-	Util::Throw( "Image32::funFilter undefined" );
-	return Image32();
+
+	Image32 output = Image32(*this);
+	for (int x = 0; x < output.width(); x++)
+	{
+		for (int y = 0; y < output.height(); y++)
+		{
+			Pixel32& temp_out = output.operator() (x, y);
+			Pixel32 temp = this->nearestSample((output.width()-1)* cos(tan(cos(tan(cos(tan(1 - sin(x / 2 * PI/(output.width()-1)))))))), (output.height() - 1) * (1 -sin(tan(sin(tan(sin(tan(1 - sin(y / 2 * PI / (output.height() - 1))))))))));
+			temp_out = temp;
+		}
+	}
+	return output;
 }
 Image32 Image32::crop( int x1 , int y1 , int x2 , int y2 ) const
 {
@@ -647,10 +761,16 @@ Image32 Image32::crop( int x1 , int y1 , int x2 , int y2 ) const
 
 Pixel32 Image32::nearestSample( float u , float v ) const
 {
-	if (u < -0.5 || u > this->width() - 0.5 || v < -0.5 || v > this->height() - 0.5 ) {
+	if (u < -0.5 || u >= this->width() - 0.5 || v < -0.5 || v >= this->height() - 0.5 ) {
 	//if ( u > this->width() - 0.5 ||  v > this->height() - 0.5) {
 		//std::cout << u << " " << v << std::endl;
-		Util::Throw("Image32::nearestSample undefined");
+		//Return a black pixel if out of bounds (for rotating)
+		Pixel32 output = Pixel32();
+		output.r = 0;
+		output.g = 0;
+		output.b = 0;
+		return output;
+		//Util::Throw("Image32::nearestSample undefined");
 
 	}
 	int iu = floor(u + 0.5);
