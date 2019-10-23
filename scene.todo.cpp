@@ -36,15 +36,24 @@ Point3D Scene::getColor( Ray3D ray , int rDepth , Point3D cLimit )
 	RayShapeIntersectionInfo iInfo = RayShapeIntersectionInfo();
 	double result = this->intersect(ray, iInfo, BoundingBox1D(), std::function< bool(double) >());
 	if (result == Infinity) {
-		return Point3D(0.0, 0.0, 0.0);;
+		return Point3D(0.2, 0.2, 0.2);;
 	}
+
 	Point3D color = Point3D(0.0, 0.0, 0.0);
 	for (std::vector< Light* >::const_iterator it = (*this)._globalData.lights.cbegin(); it != (*this)._globalData.lights.cend(); it++) {
 		color += (*it)->getAmbient(ray, iInfo);
+		color += (*it)->getDiffuse(ray, iInfo) * (*it)->isInShadow(iInfo, this);
+		color += (*it)->getSpecular(ray, iInfo) * (*it)->isInShadow(iInfo, this);
+		
+		//color = color * (*it)->isInShadow(iInfo, this);
 	}
+
+
 	//color += iInfo.material->ambient; // *iInfo.material->ambient;
 	color += iInfo.material->emissive;
-	//std::cout << iInfo.material->ambient << std::endl;
+	color[0] = std::max(0.0, std::min(1.0, color[0]));
+	color[1] = std::max(0.0, std::min(1.0, color[1]));
+	color[2] = std::max(0.0, std::min(1.0, color[2]));
 	return color; // Point3D(1, 1, 1);
 }
 

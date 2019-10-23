@@ -15,7 +15,25 @@ Point3D SpotLight::getAmbient( Ray3D ray , const RayShapeIntersectionInfo& iInfo
 	// Get the ambient contribution of the light here //
 	////////////////////////////////////////////////////
 	//THROW( "method undefined" );
+	//
+	//
+	//
+	//
+	//
+	//
+	///MAY NEED this->direction to be negative?????????????? for a lot of things
+	//
+	//
+	//
+	//
+	//
+	//
+	if ((this->_direction).unit().dot((ray.direction).unit()) > cos(this->_cutOffAngle)) {
+		double distance = sqrt((iInfo.position - ray.position).dot(iInfo.position - ray.position));
+		return Point3D(this->_ambient * iInfo.material->ambient * pow((this->_direction).unit().dot((ray.direction).unit()),this->_dropOffRate) / (this->_constAtten + this->_linearAtten * distance + this->_quadAtten * pow(distance, 2)));
+	}
 	return Point3D();
+	//return Point3D();
 }
 
 Point3D SpotLight::getDiffuse( Ray3D ray , const RayShapeIntersectionInfo& iInfo ) const
@@ -23,8 +41,26 @@ Point3D SpotLight::getDiffuse( Ray3D ray , const RayShapeIntersectionInfo& iInfo
 	////////////////////////////////////////////////////
 	// Get the diffuse contribution of the light here //
 	////////////////////////////////////////////////////
-	THROW( "method undefined" );
+	//
+	//
+	//
+	//
+	//
+	//
+	///MAY NEED this->direction to be negative?????????????? for a lot of things
+	//
+	//
+	//
+	//
+	//
+	//
+	if ((this->_direction).unit().dot((ray.direction).unit()) > cos(this->_cutOffAngle)) {
+		double distance = sqrt((iInfo.position - ray.position).dot(iInfo.position - ray.position));
+		return iInfo.material->diffuse * (iInfo.normal).dot(-this->_direction) * this->_diffuse * pow((this->_direction).unit().dot((ray.direction).unit()), this->_dropOffRate) / (this->_constAtten + this->_linearAtten * distance + this->_quadAtten * pow(distance, 2));
+	}
 	return Point3D();
+	//WARN_ONCE( "method undefined" );
+	//return Point3D();
 }
 
 Point3D SpotLight::getSpecular( Ray3D ray , const RayShapeIntersectionInfo& iInfo ) const
@@ -32,7 +68,28 @@ Point3D SpotLight::getSpecular( Ray3D ray , const RayShapeIntersectionInfo& iInf
 	/////////////////////////////////////////////////////
 	// Get the specular contribution of the light here //
 	/////////////////////////////////////////////////////
-	THROW( "method undefined" );
+	//WARN_ONCE( "method undefined" );
+	//return Point3D();
+	//
+	//
+	//
+	//
+	//
+	//
+	///MAY NEED this->direction to be negative?????????????? for a lot of things
+	//
+	//
+	//
+	//
+	//
+	//
+	Point3D R = 2 * (iInfo.normal).dot(-this->_direction) * iInfo.normal - -this->_direction;
+	return this->_specular * iInfo.material->specular * pow((ray.direction).dot(R), iInfo.material->specularFallOff);
+
+	if ((this->_direction).unit().dot((ray.direction).unit()) > cos(this->_cutOffAngle)) {
+		double distance = sqrt((iInfo.position - ray.position).dot(iInfo.position - ray.position));
+		return iInfo.material->diffuse * (iInfo.normal).dot(-this->_direction) * this->_diffuse * pow((this->_direction).unit().dot((ray.direction).unit()), this->_dropOffRate) / (this->_constAtten + this->_linearAtten * distance + this->_quadAtten * pow(distance, 2));
+	}
 	return Point3D();
 }
 
@@ -41,7 +98,7 @@ bool SpotLight::isInShadow( const RayShapeIntersectionInfo& iInfo , const Shape*
 	//////////////////////////////////////////////
 	// Determine if the light is in shadow here //
 	//////////////////////////////////////////////
-	THROW( "method undefined" );
+	WARN_ONCE( "method undefined" );
 	return false;
 }
 

@@ -80,6 +80,15 @@ double Triangle::intersect( Ray3D ray , RayShapeIntersectionInfo& iInfo , Boundi
 	double testCase2 = vertexNormal.dot(Point3D::CrossProduct(b1, a1));
 	double testCase3 = vertexNormal.dot(Point3D::CrossProduct(b2, a2));
 	iInfo.position = P;
+	iInfo.normal = vertexNormal;
+
+	//////////////
+	//if (validityLambda(t)) {
+	//	return Infinity;
+	//}
+	/////////////////
+
+	//iInfo.texture = (*ray)->RayShapeIntersectionInfo::texture;
 	if (testCase1 > 0 && testCase2 > 0 && testCase3 > 0) {
 		//std::cout << "hit" << std::endl;
 		//iInfo.material = this.;

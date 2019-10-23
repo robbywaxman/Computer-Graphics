@@ -29,7 +29,7 @@ Ray3D Camera::getRay( int i , int j , int width , int height ) const
 	Point3D v = this->right * x + this->up * y + this->forward;
 	ray->direction = v.unit();
 	if (count % 1000 == 0) {
-		std::cout << count << std::endl;
+		//std::cout << count << std::endl;
 	}
 	return *ray;
 }

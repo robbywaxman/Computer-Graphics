@@ -47,11 +47,46 @@ double Sphere::intersect( Ray3D ray , RayShapeIntersectionInfo &iInfo , Bounding
 	//////////////////////////////////////////////////////////////
 
 	Point3D rayDirection = ray.direction;
-	Point3D sphereCenter = (*this).center;
 	Point3D rayPosition = ray.position;
-
+	Point3D sphereCenter = (*this).center;
 	double radius = (*this).radius;
 
+	Polynomial1D<2> poly = Polynomial1D<2>();
+	poly.coefficient(2) = 1;
+	poly.coefficient(1) = 2 * rayDirection.dot(rayPosition - sphereCenter);
+	poly.coefficient(0) = (rayPosition - sphereCenter).squareNorm() - pow(radius, 2);
+	double *roots = new double [2];
+	int numRoots = poly.roots(roots);
+	//if (numRoots != 0) {
+	//	std::cout << numRoots << std::endl;
+	//}
+	if (numRoots == 0) {
+		return Infinity;
+	}
+	else if (numRoots == 1 && roots[0] >= 0) {
+		iInfo.position = ray(roots[0]);
+		iInfo.normal = (iInfo.position - sphereCenter).unit(); 
+		iInfo.material = this->_material;
+		return roots[0];
+	}
+	else if (numRoots == 1 && roots[0] < 0) {
+		return Infinity;
+	}
+	if (roots[0] < 0 && roots[1] < 0) {
+		return Infinity;
+	}
+	if ((roots[0] >= 0 && roots[1] < 0) || (roots[0] < 0 && roots[1] >= 0)) {
+		iInfo.position = ray(std::max(roots[0], roots[1]));
+		iInfo.normal = (iInfo.position - sphereCenter).unit();
+		iInfo.material = this->_material;
+		return std::max(roots[0], roots[1]);
+	}
+
+	iInfo.position = ray(std::min(roots[0], roots[1]));
+	iInfo.normal = (iInfo.position - sphereCenter).unit();
+	iInfo.material = this->_material;
+	return std::min(roots[0], roots[1]);
+	/*
 	//Solve Geometrically
 	double tca = (sphereCenter - rayPosition).dot(rayDirection);
 	if (tca < 0) {
@@ -64,9 +99,12 @@ double Sphere::intersect( Ray3D ray , RayShapeIntersectionInfo &iInfo , Bounding
 	double thc = sqrt(pow(radius, 2) - dSquared);
 	double intersection = std::min(tca - thc, tca + thc);
 	iInfo.position = rayPosition + rayDirection;
-	iInfo.normal = (iInfo.position - sphereCenter).unit();
+	iInfo.normal = Point3D(1, 0, 0); // (iInfo.position - sphereCenter).unit();
+	//std::cout << iInfo.normal << std::endl;
 	iInfo.material = this->_material;
+	//iInfo.texture = this->_texture;
 	return intersection;
+	*/
 
 }
 
